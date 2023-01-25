@@ -1,0 +1,161 @@
+##!/bin/bash
+#set -e
+#
+##########################################################
+#                                                        #
+#             SMD-BlackArch Installation script          #
+#  ArchLinux Applications Automatic Installation Script  #
+#  Inspired and Forked From                              #
+#  https://github.com/SofianeHamlaoui/ArchI0             #
+#  And                                                   #
+#  https://github.com/arcolinuxd/arco-xfce               #
+################################################################
+#    +FIRST  : sudo chmod +x display-manager-and-desktop.sh    #                
+#                (Give EXEC Access To Script)                  #
+#    +TO RUN    : ./display-manager-and-desktop.sh             #
+################################################################
+#                                                        #
+#                DO NOT JUST RUN THIS.                   #
+#       EXAMINE AND JUDGE. RUN AT YOUR OWN RISK.         #
+#                                                        #
+##########################################################
+#
+#
+#  TO DO:
+#
+#
+######################## Variables #######################
+#
+# b=bold u=underline bl=black r=red g=green
+# y=yellow bu=blue m=magenta c=cyan w=white
+# endc=end-color enda=end-argument
+b='\033[1m'
+u='\033[4m'
+bl='\E[30m'
+r='\E[31m'
+g='\E[32m'
+y='\E[33m'
+bu='\E[34m'
+m='\E[35m'
+c='\E[36m'
+w='\E[37m'
+endc='\E[0m'
+enda='\033[0m'
+version="20230124"
+
+####################### Functions ########################
+
+function install {
+  # Check If Package Is Installed
+  if pacman -Qi $1 &> /dev/null; then
+      echo -e " [${g}✔${endc}]::[${b}"$1"${enda}] Is Already Installed!"
+  else
+      sudo pacman -S --noconfirm --needed $1
+      # Verify Successful Installation
+    if pacman -Qi $package &> /dev/null; then
+      echo -e " [${g}✔${endc}]::[${b}"$1"${enda}]: Installed!"
+    else
+      echo -e " [${r}!${endc}]::[${b}"$1"${enda}]: ${r}NOT Installed!${endc}"
+    fi
+  fi
+}
+
+echo
+echo -e " [${g}✔${endc}]::[${g}${b}Installation Of Core Software${enda}${endc}]"
+echo
+
+list=(
+blackarch-config-x11
+blackarch-config-gtk
+lightdm
+lightdm-gtk-greeter
+xdg-user-dirs
+xfce4
+xfce4-goodies
+blackarch-config-icons
+blackarch-config-cursor
+blackarch-menus
+blackarch-artwork
+blackarch-config-xfce
+blackarch-config-openbox
+blackarch-config-fluxbox
+blackarch-config-awesome
+blackarch-config-lxdm
+blackarch-config-zsh
+blackarch-config-bash
+)
+
+count=0
+
+for name in "${list[@]}" ; do
+  count=$[count+1]
+  echo -e " ${y}Installing package # "$count" ${b}["$name"]${enda} ${endc}" ;
+  install $name
+done
+
+###############################################################################
+
+echo
+echo -e " [${g}✔${endc}]::[${g}${b}Configuring X11${enda}${endc}]"
+echo
+cp -a /usr/share/blackarch/config/x11/xprofile /etc/xprofile
+cp -a /usr/share/blackarch/config/x11/Xresources ~/.Xresources
+cp -a /usr/share/blackarch/config/x11/Xdefaults ~/.Xdefaults
+
+echo
+echo -e " [${g}✔${endc}]::[${g}${b}Configuring Openbox${enda}${endc}]"
+echo
+cp -a /usr/share/blackarch/config/openbox/etc/xdg/openbox-blackarch/* /etc/xdg/openbox
+cp -a /usr/share/blackarch/config/openbox/usr/share/themes/blackarch/openbox-3-blackarch/* /usr/share/themes/blackarch/openbox-3/
+
+echo
+echo -e " [${g}✔${endc}]::[${g}${b}Configuring Fluxbox${enda}${endc}]"
+echo
+cp -a /usr/share/blackarch/config/fluxbox/* /usr/share/fluxbox
+
+echo
+echo -e " [${g}✔${endc}]::[${g}${b}Configuring Awesome${enda}${endc}]"
+echo
+cp /usr/share/blackarch/config/awesome/etc/xdg/awesome/rc.lua.blackarch /etc/xdg/awesome/rc.lua
+cp -a /usr/share/blackarch/config/awesome/usr/share/awesome/themes/blackarch /usr/share/awesome/themes/
+
+echo
+echo -e " [${g}✔${endc}]::[${g}${b}Configuring LXDM${enda}${endc}]"
+echo
+cp -a /etc/lxdm-blackarch/* /etc/lxdm/
+cp -a /usr/share/lxdm-blackarch/* /usr/share/lxdm/
+cp -a /usr/share/xsessions-blackarch/* /usr/share/xsessions/
+
+echo
+echo -e " [${g}✔${endc}]::[${g}${b}Configuring zsh${enda}${endc}]"
+echo
+cp -a /usr/share/blackarch/config/zsh/zshrc ~/.zshrc
+
+echo
+echo -e " [${g}✔${endc}]::[${g}${b}Configuring bash${enda}${endc}]"
+echo
+cp -a /usr/share/blackarch/config/bash/bashrc ~/.bashrc
+cp -a /usr/share/blackarch/config/bash/bash_profile ~/.bash_profile
+
+echo
+echo -e " [${g}✔${endc}]::[${g}${b}Configuring GTK2${enda}${endc}]"
+echo
+cp -a /usr/share/blackarch/config/gtk-2.0/* /usr/share/gtk-2.0/
+
+echo
+echo -e " [${g}✔${endc}]::[${g}${b}Enabling lightdm Display Manager${enda}${endc}]"
+echo
+sudo systemctl enable lightdm.service -f
+
+#echo -e " [${g}✔${endc}]::Copying all files and folders from ${b}${bu}[ /etc/skel to ~ ]${endc}${enda}"
+#echo
+#cp -Rf ~/.config ~/.config-backup-$(date +%Y.%m.%d-%H.%M.%S)
+#cp -arf /etc/skel/. ~
+
+echo
+echo -e " [${g}✔${endc}]::[${g}${b}A Minimal Functional Desktop Is Now Installed${enda}${endc}]"
+echo
+echo -e " ${bu}SMD-BlackArch Installation Script Version${b} $version ${enda} ${endc}"
+echo
+echo -e " [${r}!${endc}]::[${b}${r}REBOOT YOUR SYSTEM${endc}${enda}]::[${r}!${endc}]"
+echo
